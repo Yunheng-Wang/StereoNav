@@ -1,0 +1,60 @@
+# StereoVLN Training Configuration
+# Global batch_size = batch_size * GPU_NUM * grad_accumulation_steps
+
+main:
+  batch_size: 4                    # Per-GPU batch size
+  save_root: "log/"                # Directory to save training logs and checkpoints
+  dtype: "bf16"                    # Training precision (bfloat16)
+  image_size: 448                  # Input image resolution
+  training_epoch: 1                # Number of training epochs (total episodes: 648629)
+  cpu_workers_num: 8               # Number of CPU workers for data loading
+  prediction_steps: 4              # Number of future steps to predict
+  history_steps: 8                 # Number of historical frames to use
+  valid_depth: 5                   # Valid depth threshold (meters)
+  depth_iters: 4                   # Number of depth refinement iterations
+  window_size: 24                  # Sliding window size (number of frames)
+  beta: 8                          # Sample beta frames per window; initial and final windows sample 1.5*beta frames
+  wandb: "offline"                 # Weights & Biases logging mode (offline/online)
+  data_root: "data/cache"          # Root directory for cached training data
+
+  gradient:
+    grad_clip_norm: 0.5            # Gradient clipping norm
+    grad_accumulation_steps: 16    # Gradient accumulation steps
+
+
+training:
+  optimizer:
+    lr: 2.0e-5                     # Base learning rate
+    depth_lr: 2.0e-6               # Learning rate for depth estimation module
+    weight_decay: 0.01             # Weight decay for regularization
+    betas: [0.9, 0.999]            # Adam optimizer beta parameters
+    eps: 1.0e-8                    # Adam optimizer epsilon
+  scheduler:
+    warmup_ratio: 0.05             # Warmup ratio of total training steps
+    num_cycles: 0.5                # Number of cosine annealing cycles
+    min_lr_ratio: 0.9              # Minimum learning rate ratio
+
+  weight_pointsloss: 0.01          # Loss weight for point prediction
+  weight_depthloss: 0.1            # Loss weight for depth estimation
+  weight_languageloss: 1.0         # Loss weight for language generation
+
+
+model:
+  dim: 2048                        # Hidden dimension size
+  depth_token_weight: 0.2          # Weight for depth tokens in fusion
+  dino_token_weight: 0.6           # Weight for DINO tokens in fusion
+
+  enable_pointhead: false          # Enable/disable point head training
+  enable_depth: true               # Enable/disable depth estimation training
+
+  vlm:
+    max_tokens: 4096               # Maximum token length for VLM
+    vlm_checkpoints_path: "checkpoints/InternVL3_5-2B"
+  foundationstereo:
+    foundationstereo_checkpoints_path: "checkpoints/foundationstereo/23-51-11"
+    foundationstereo_edgenext_path: "checkpoints/edgenext_small/model.safetensors"
+  pointhead:
+    mlp_ratio: 0.5                 # MLP expansion ratio in point head
+    dropout: 0.1                   # Dropout rate in point head
+  dino:
+    dino_path: "checkpoints/dinov2_large/model.safetensors"

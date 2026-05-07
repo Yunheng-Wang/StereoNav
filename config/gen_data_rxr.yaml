@@ -1,0 +1,56 @@
+# @package _global_
+
+defaults:
+  - /habitat: habitat_config_base
+  - /habitat/task: vln_r2r
+  - /habitat/simulator/agents@habitat.simulator.agents.main_agent: rgbd_agent
+  - /habitat/dataset/vln: mp3d_r2r
+  - /habitat/task/lab_sensors:
+    - gps_sensor
+    - compass_sensor
+  - _self_
+
+
+habitat:
+
+  environment:
+    max_episode_steps: 500
+    iterator_options:
+      max_scene_repeat_steps: 50000
+      shuffle: False
+
+  simulator:
+    forward_step_size: 0.25   # 默认执行 0.25m
+    turn_angle: 15            # 默认转身为15度
+    habitat_sim_v0:
+      gpu_device_id: 0
+
+  task:
+    measurements:
+      # 计算机器人当前位置离终点还有多远
+      distance_to_goal:
+        type: DistanceToGoal
+        distance_to: POINT
+      # sr
+      success:
+        type: Success
+        success_distance: 3.0
+      # spl
+      spl:
+        type: SPL
+      # osr
+      oracle_success:
+        type: OracleSuccess
+        # success_distance: 3.0
+      # ne
+      oracle_navigation_error:
+        type: OracleNavigationError
+      # pl (path length ratio, used by DAgger)
+      pl:
+        type: PL
+
+  dataset:
+    type: RxRVLN-v1
+    split: train
+    scenes_dir: scene/
+    data_path: task/rxr/{split}/{split}_guide.json.gz
