@@ -3,9 +3,9 @@
   <p align="center">
     <a href="">Yunheng Wang</a><sup>1,*</sup>
     .
-    <a href="">Yuetong Fang</a><sup>1,*</sup>
+    <a href="">Yuetong Fang</a><sup>1</sup>
     .
-    <a href="">Taowen Wang</a><sup>1,*</sup>
+    <a href="">Taowen Wang</a><sup>1</sup>
     .
     <a href="">Lusong Li</a><sup>2</sup>
     .
