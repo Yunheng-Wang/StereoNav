@@ -1,7 +1,7 @@
 <p align="center">
   <h2 align="center"> What Limits Vision-and-Language Navigation? </h2>
   <p align="center">
-    <a href="">Yunheng Wang</a><sup>1,*</sup>
+    <a href="">Yunheng Wang</a><sup>1</sup>
     .
     <a href="">Yuetong Fang</a><sup>1</sup>
     .
