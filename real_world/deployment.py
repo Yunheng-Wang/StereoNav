@@ -1,5 +1,12 @@
 """
-deployment.py — 运行在主机上，连接 G1 和远程推理服务器。
+deployment.py — Runs on the host machine, connecting the G1 robot and the remote inference server.
+
+Flow:
+  1. Fetch stereo frames from the ZED camera server.
+  2. Build a history buffer of past frames.
+  3. Send frames + instruction to the StereoNav inference server.
+  4. Parse the returned action sequence and forward it to the robot action server.
+  5. Repeat until a stop action is received or max_steps is reached.
 """
 
 import sys
@@ -62,7 +69,7 @@ def build_history(frames, history_num, image_size):
         frames = pad + frames
 
     elif n > history_num:
-        # 均匀采样，并保证包含最后一帧
+        # uniformly sample history frames, always including the last one
         indices = np.linspace(0, n - 1, history_num).astype(int)
         frames = [frames[i] for i in indices]
 
@@ -90,7 +97,7 @@ def set_zed_target(zed_base, target):
 
 
 def send_actions(action_server_url, actions):
-    """发送动作列表到 action_server。"""
+    """Send a list of actions to the robot action server."""
     resp = requests.post(
         f"{action_server_url}/execute",
         json={"actions": actions},
@@ -149,9 +156,7 @@ def tensor_to_uint8_image(tensor_img):
 
 
 def save_run_config(results_dir, args, timestamp):
-    """
-    保存本次 deployment 的输入配置。
-    """
+    """Save the deployment configuration for this run."""
     config = {
         "run_timestamp": timestamp,
         "raw_instruction": args.raw_instruction,
@@ -175,9 +180,7 @@ def save_run_config(results_dir, args, timestamp):
 
 
 def save_step_result(results_dir, step_id, left_cur, right_cur, generated, actions):
-    """
-    保存每次输入模型的左右图，以及模型原始输出和解析后的 action。
-    """
+    """Save the input stereo frames, raw model output, and parsed actions for each step."""
     step_name = f"step_{step_id:04d}"
 
     left_rgb = tensor_to_uint8_image(left_cur)
@@ -209,7 +212,7 @@ def main():
     parser.add_argument("--target", type=float, nargs=2, required=True, metavar=("X", "Y"))
     parser.add_argument("--zed_ip", type=str, default="192.168.123.164")
     parser.add_argument("--action_url", type=str, default="http://127.0.0.1:8001")
-    parser.add_argument("--server_url", type=str, default="http://116.198.71.58:7200")
+    parser.add_argument("--server_url", type=str, default="http://127.0.0.1:7200")
     parser.add_argument("--image_size", type=int, default=448)
     parser.add_argument("--history_num", type=int, default=8)
     parser.add_argument("--execute_steps", type=int, default=4)
@@ -222,7 +225,7 @@ def main():
     zed_base = f"http://{args.zed_ip}:8000"
     action_base = args.action_url
 
-    # results 文件夹：和 deployment.py 同级
+    # results directory: saved alongside deployment.py
     script_dir = os.path.dirname(os.path.abspath(__file__))
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     results_dir = os.path.join(script_dir, "results", timestamp)
@@ -280,7 +283,7 @@ def main():
 
             print(f"  Actions: {[IDX2ACTION[a] for a in action_seq]}")
 
-            # 保存本次真正输入模型的左右图和模型输出 action
+            # save the input stereo frames and model output for this inference step
             save_step_result(
                 results_dir=results_dir,
                 step_id=step_id,
@@ -290,7 +293,7 @@ def main():
                 actions=action_seq.copy(),
             )
 
-            # 批量发送给 action_server 执行
+            # dispatch the full action sequence to the robot action server
             send_actions(action_base, action_seq.copy())
 
         action = action_seq.pop(0)

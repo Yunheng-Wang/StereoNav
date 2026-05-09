@@ -494,5 +494,116 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 accelerate launch \
 ```
 
 
-# 真机实验
+# 🤖 Real-World Deployment
 
+StereoNav is deployed on a **Unitree G1** humanoid robot equipped with a **ZED Mini** stereo camera. Since G1 does not have a built-in stereo camera mount, we use the open-source [TWIST2 Build Neck](https://yanjieze.com/TWIST2/) fixture to attach the ZED Mini to the robot's head.
+
+The deployment involves four components running across three machines:
+
+| Component | Machine | Script |
+|---|---|---|
+| ZED camera server | G1 onboard computer | `real_world/zed/zed_realtime_server.py` |
+| Robot action server | Laptop (connected to G1) | `real_world/action_server.py` |
+| StereoNav inference server | Remote GPU server | `scripts/server.sh` |
+| Navigation controller | Laptop | `real_world/deployment.sh` |
+
+---
+
+## Step 1: Hardware Setup
+
+1. Print and assemble the [TWIST2 Build Neck](https://yanjieze.com/TWIST2/) fixture.
+2. Mount the ZED Mini camera onto the fixture and attach it to the G1 robot's head.
+3. Connect the ZED Mini to the G1 onboard computer via USB.
+
+---
+
+## Step 2: Start the ZED Camera Server (on G1)
+
+SSH into the G1 onboard computer (refer to the [G1 developer guide](https://support.unitree.com/home/en/G1_developer/about_G1)):
+```bash
+ssh unitree@192.168.123.161
+```
+
+Upload the ZED server files to the robot:
+```bash
+# Run this on your laptop
+scp -r real_world/zed unitree@192.168.123.161:/home/unitree/
+```
+
+Then on the G1, start the camera server:
+```bash
+/usr/bin/python3 /home/unitree/zed/zed_realtime_server.py --network eth0
+```
+
+> `--network` should match the network interface connected to your laptop (e.g., `eth0`). A successful start prints `ZED opened successfully.`
+
+---
+
+## Step 3: Start the Robot Action Server (on Laptop)
+
+Before starting, configure `real_world/action_config.json`:
+```json
+{
+    "unitree_sdk_path": "/path/to/unitree_sdk2_python",
+    "network": "eth0",
+    "action_port": 8001,
+    ...
+}
+```
+
+Set `unitree_sdk_path` to the absolute path of your local `unitree_sdk2_python` directory, and `network` to the interface connected to G1.
+
+Then start the action server:
+```bash
+cd real_world
+python action_server.py
+```
+
+---
+
+## Step 4: Start the Inference Server (on Remote GPU Server)
+
+SSH into your GPU server and start the StereoNav inference server:
+
+1. Edit `scripts/server.sh`:
+   - Set `CHECKPOINT_PATH` to your model checkpoint directory (e.g., `checkpoints/stereonav_stage2`)
+   - Set `BASE_PORT` (default: `7200`) and `NUM_GPUS` (default: `8`)
+
+2. Launch the server:
+   ```bash
+   bash scripts/server.sh
+   ```
+
+3. Forward the inference server port to your laptop:
+   ```bash
+   # Run this on your laptop
+   ssh -L 7203:127.0.0.1:7203 user@<gpu-server-ip>
+   ```
+
+---
+
+## Step 5: Run Navigation (on Laptop)
+
+Configure and run `real_world/deployment.sh`:
+
+```bash
+# Navigation instruction for the robot
+USER_INSTRUCTION="Walk forward through the hallway, turn left at the end, ..."
+
+# LLM API for instruction parsing
+LLM_API_KEY="your-api-key"
+LLM_BASE_URL="https://api.openai.com/v1"
+LLM_MODEL="gpt-4o"
+
+# Service endpoints
+ZED_IP="192.168.123.161"     # G1 onboard computer IP
+ACTION_URL="http://127.0.0.1:8001"   # action server
+SERVER_URL="http://127.0.0.1:7203"   # inference server (port-forwarded)
+```
+
+Then launch:
+```bash
+bash real_world/deployment.sh
+```
+
+The controller will parse the instruction, fetch stereo frames from the ZED server, query the inference server for actions, and send them to the robot — repeating until a stop action is predicted or `MAX_STEPS` is reached.

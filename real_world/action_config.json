@@ -5,5 +5,5 @@
     "move_duration": 1.5,
     "turn_duration": 0.70,
     "network": "eth0",
-    "unitree_sdk_path": "/mnt/workspace/xujunzhe/yunhengwang/StereoVLN_InternVL_3_5_2_B/real_world/zed/unitree_sdk2_python"
+    "unitree_sdk_path": "/path/to/unitree_sdk2_python"
 }

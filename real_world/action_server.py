@@ -1,12 +1,12 @@
 """
-action_server.py — 运行在 G1 上，接收外部电脑发来的动作列表并执行。
+action_server.py — Runs on the G1 robot, receives action sequences from the host machine and executes them.
 
-外部电脑调用示例：
+Example call from host:
     curl -X POST http://<G1_IP>:8001/execute \
          -H "Content-Type: application/json" \
          -d '{"actions": [1, 1, 1, 1]}'
 
-动作定义：
+Action definitions:
     0: stop
     1: move forward
     2: turn left
@@ -112,9 +112,9 @@ class ActionHandler(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps({"error": str(e)}).encode())
             return
 
-        # 关键修改：
-        # 不再开后台线程，而是在当前 HTTP 请求里同步执行
-        # 这样只有 execute_actions(actions) 完成后，才会返回响应
+        # Execute actions synchronously within the HTTP request handler.
+        # The response is only returned after execute_actions() completes,
+        # ensuring the caller knows when the robot has finished moving.
         try:
             execute_actions(actions)
         except Exception as e:

@@ -35,13 +35,13 @@ def get_K():
 K = get_K()
 
 
-# ---------- 里程计状态（线程安全） ----------
+# ---------- Odometry state (thread-safe) ----------
 class OdomState:
     def __init__(self):
         self.lock = threading.Lock()
-        # 世界坐标系下机身几何中心位置 [x, y, z]
+        # robot body center position in world frame [x, y, z]
         self.position = np.zeros(3)
-        # 四元数 [w, x, y, z]（机器人坐标系相对世界坐标系的旋转）
+        # quaternion [w, x, y, z] representing robot orientation relative to world frame
         self.quat = np.array([1.0, 0.0, 0.0, 0.0])
         self.ready = False
 
@@ -49,7 +49,7 @@ odom_state = OdomState()
 
 
 def odom_callback(msg: SportModeState_):
-    pos = np.array(msg.position, dtype=np.float64)       # [x, y, z] 世界系
+    pos = np.array(msg.position, dtype=np.float64)            # [x, y, z] in world frame
     q = np.array(msg.imu_state.quaternion, dtype=np.float64)  # [w, x, y, z]
     with odom_state.lock:
         odom_state.position = pos
@@ -58,7 +58,7 @@ def odom_callback(msg: SportModeState_):
 
 
 def quat_to_rot(q):
-    """四元数 [w, x, y, z] -> 3x3 旋转矩阵 R（世界->机器人 body）"""
+    """Convert quaternion [w, x, y, z] to 3x3 rotation matrix R (world -> robot body)."""
     w, x, y, z = q / np.linalg.norm(q)
     return np.array([
         [1-2*(y*y+z*z),   2*(x*y-w*z),   2*(x*z+w*y)],
@@ -72,7 +72,7 @@ def world_to_image(target_world, cam_side):
         pos = odom_state.position.copy()
         q = odom_state.quat.copy()
 
-    # quat_to_rot 通常是 body -> world
+    # quat_to_rot returns body -> world rotation
     R_body_to_world = quat_to_rot(q)
     R_world_to_body = R_body_to_world.T
 
@@ -90,8 +90,8 @@ def world_to_image(target_world, cam_side):
     # world -> body
     rel_body = R_world_to_body @ rel_world
 
-    # G1 body: x前, y左, z上
-    # CV camera: x右, y下, z前
+    # G1 body frame: x=forward, y=left, z=up
+    # CV camera frame: x=right, y=down, z=forward
     cam_x = -rel_body[1]
     cam_y = -rel_body[2]
     cam_z =  rel_body[0]
@@ -117,7 +117,7 @@ def encode_jpg(image_bgr):
     return buf.tobytes() if ok else None
 
 
-# ---------- 帧缓冲 ----------
+# ---------- Frame buffer ----------
 class FrameBuffer:
     def __init__(self):
         self.lock = threading.Lock()
@@ -129,7 +129,7 @@ class FrameBuffer:
 
 frame_buffer = FrameBuffer()
 
-# 目标点（世界坐标系，由命令行参数设置）
+# target point in world frame, updated via POST /target
 target_world = np.array([0.0, 0.0, 0.0])
 
 
@@ -193,7 +193,7 @@ def zed_capture_loop():
         time.sleep(0.001)
 
 
-# ---------- HTTP 服务 ----------
+# ---------- HTTP server ----------
 class ZEDRequestHandler(BaseHTTPRequestHandler):
     def send_jpg(self, jpg_bytes):
         if jpg_bytes is None:
@@ -250,7 +250,7 @@ class ZEDRequestHandler(BaseHTTPRequestHandler):
             try:
                 data = json.loads(body)
 
-                # 1. 更新目标点
+                # 1. update target point
                 target_world[:] = [
                     float(data["x"]),
                     float(data["y"]),
@@ -258,10 +258,10 @@ class ZEDRequestHandler(BaseHTTPRequestHandler):
                 ]
                 print(f"Target updated: {target_world.tolist()}")
 
-                # 2. 只在 POST /target 时等 2 秒
+                # 2. wait 2s for the frame buffer to refresh with the new target overlay
                 time.sleep(2.0)
 
-                # 3. 再返回响应
+                # 3. return response after frame refresh
                 self.send_response(200)
                 self.send_header("Content-Type", "application/json")
                 self.end_headers()
@@ -287,12 +287,12 @@ class ZEDRequestHandler(BaseHTTPRequestHandler):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--network", type=str, default=_cfg.get("network", "eth0"),
-                        help="DDS 网络接口名，默认读 config.json")
+                        help="DDS network interface name, defaults to value in zed_config.json")
     args = parser.parse_args()
 
     print("Target not set yet. Use POST /target {\"x\":...,\"y\":...,\"z\":...} to set.")
 
-    # 初始化 DDS，订阅里程计
+    # initialize DDS and subscribe to odometry topic
     ChannelFactoryInitialize(0, args.network)
     odom_sub = ChannelSubscriber("rt/odommodestate", SportModeState_)
     odom_sub.Init(odom_callback, 10)
@@ -306,5 +306,5 @@ if __name__ == "__main__":
     server.serve_forever()
 
 
-# g1 上执行示例：
+# Example usage on G1:
 # /usr/bin/python3 zed_realtime_server.py --network eth0
