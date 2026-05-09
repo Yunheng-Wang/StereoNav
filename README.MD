@@ -1,12 +1,12 @@
 <p align="center">
-  <img src="StereoVLN_InternVL_3_5_2_B/asset/logo.png" alt="StereoNav Logo" width="200"/>
+  <img src="asset/logo.png" alt="StereoNav Logo" width="200"/>
   <h2 align="center"> What Limits Vision-and-Language Navigation? </h2>
   <p align="center">
-    <a href="">Yunheng Wang</a><sup>1</sup>
+    <a href="">Yunheng Wang</a><sup>1,*</sup>
     .
-    <a href="">Yuetong Fang</a><sup>1</sup>
+    <a href="">Yuetong Fang</a><sup>1,*</sup>
     .
-    <a href="">Taowen Wang</a><sup>1</sup>
+    <a href="">Taowen Wang</a><sup>1,*</sup>
     .
     <a href="">Lusong Li</a><sup>2</sup>
     .
@@ -43,7 +43,7 @@
   </p>
 
   <p align="center">
-    <img src="StereoVLN_InternVL_3_5_2_B/asset/main.png" alt="Overview of StereoNav" width="900"/>
+    <img src="asset/main.png" alt="Overview of StereoNav" width="900"/>
   </p>
   <p align="center"><em>Overview of StereoNav. StereoNav takes stereo RGB observations, a navigation instruction, and a target-location prior as input. The target prior is rendered as persistent visual guidance, while stereo observations are encoded into unified semantic, structural, and geometric tokens through 2D semantic, 2D structural, and 3D geometry encoders. These tokens are then processed by the MLLM for joint action and depth prediction. The right panels illustrate detailed designs of selected modules.</em></p>
 </p>
