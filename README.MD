@@ -200,53 +200,69 @@ data/cache/
 
 # 🧪 Evaluation
 
+All evaluations use the `stereonav_test` environment and require a running StereoNav inference server.
+
 ## Prerequisites: Start Inference Servers
 
-Before running any evaluation, start the model inference servers:
+The inference server runs the StereoNav model and responds to evaluation queries. All evaluation scripts communicate with it over HTTP.
+
+Activate the training environment and start the server:
+```bash
+conda activate stereonav_train
+```
 
 1. Edit `scripts/server.sh`:
-   - Set `CHECKPOINT_PATH` to your model checkpoint directory
-   - Set `BASE_PORT` (default: 7200) and `NUM_GPUS` (default: 8)
+   - `CHECKPOINT_PATH`: path to your model checkpoint directory (e.g., `checkpoints/stereonav_stage2`)
+   - `BASE_PORT`: starting port for server instances (default: `7200`)
+   - `NUM_GPUS`: number of parallel server instances to launch (default: `8`)
 
-2. Launch servers:
+2. Launch the servers:
    ```bash
    bash scripts/server.sh
    ```
 
-Each server instance will listen on ports `BASE_PORT` to `BASE_PORT+NUM_GPUS-1`.
+Each instance listens on a separate port from `BASE_PORT` to `BASE_PORT + NUM_GPUS - 1`. Evaluation scripts distribute requests across all running instances.
 
 ---
 
 ## 1. Accuracy Evaluation (Exact Goal Points)
 
-Evaluate navigation performance with precise goal-point annotations.
+Evaluates standard navigation performance using precise ground-truth goal-point annotations. This is the primary benchmark setting reported in the paper.
 
-**Configuration:**
-- Edit `evaluation/accuracy_eval_p_exact.sh`:
-  - Set `DATASET` to `"r2r"` or `"rxr"`
-  - Ensure `BASE_PORT` and `NUM_SERVERS` match your running servers
+**Environment:** `stereonav_test`
 
-**Run:**
+**Configuration** — edit `evaluation/accuracy_eval_p_exact.sh`:
+| Parameter | Description |
+|---|---|
+| `DATASET` | Dataset to evaluate: `"r2r"` or `"rxr"` |
+| `BASE_PORT` | Must match the port used when starting the inference server |
+| `NUM_SERVERS` | Number of running server instances |
+
 ```bash
+conda activate stereonav_test
 bash evaluation/accuracy_eval_p_exact.sh
 ```
 
-**Metrics:** Success Rate, SPL, Oracle Success, Navigation Error, Trajectory Length, nDTW
+**Metrics:** Success Rate (SR), SPL, Oracle Success Rate, Navigation Error (NE), Trajectory Length (TL), nDTW
 
 ---
 
 ## 2. Accuracy Evaluation (Coarse Goal Points)
 
-Evaluate robustness to goal-point localization errors.
+Evaluates robustness to goal-point localization errors by randomly sampling the goal point within a radius around the true target. This simulates real-world scenarios where GPS or map-based localization is imprecise.
 
-**Configuration:**
-- Edit `evaluation/accuracy_eval_p_coarse.sh`:
-  - Set `DATASET` to `"r2r"` or `"rxr"`
-  - Set `COARSE_RADIUS` (meters) — radius of random sampling around true goal (e.g., `2.0` = ±2m error)
-  - Ensure `BASE_PORT` and `NUM_SERVERS` match your running servers
+**Environment:** `stereonav_test`
 
-**Run:**
+**Configuration** — edit `evaluation/accuracy_eval_p_coarse.sh`:
+| Parameter | Description |
+|---|---|
+| `DATASET` | Dataset to evaluate: `"r2r"` or `"rxr"` |
+| `COARSE_RADIUS` | Sampling radius in meters around the true goal (e.g., `2.0` = ±2m error) |
+| `BASE_PORT` | Must match the port used when starting the inference server |
+| `NUM_SERVERS` | Number of running server instances |
+
 ```bash
+conda activate stereonav_test
 bash evaluation/accuracy_eval_p_coarse.sh
 ```
 
@@ -254,20 +270,20 @@ bash evaluation/accuracy_eval_p_coarse.sh
 
 ## 3. Robustness Evaluation
 
+These evaluations test the agent's resilience to various visual and physical perturbations that commonly occur in real-world deployment. All four sub-evaluations use the `stereonav_test` environment.
+
 ### 3.1 Lighting Perturbation
 
-Test robustness to lighting changes.
+Simulates lighting condition changes (e.g., overexposure, underexposure) by applying a global brightness offset to all input frames.
 
-**Configuration:**
-- Edit `evaluation/robustness_eval_p_perturbation.sh`:
-  - Set `LIGHT_PERTURBATION` — lighting adjustment factor:
-    - `0.0` = default lighting
-    - Positive values (e.g., `0.8`) = brighter
-    - Negative values (e.g., `-0.5`) = darker
-    - Range: `-1.0` to `1.0`
+**Configuration** — edit `evaluation/robustness_eval_p_perturbation.sh`:
+| Parameter | Description |
+|---|---|
+| `LIGHT_PERTURBATION` | Brightness offset applied to each frame. `0.0` = no change; positive = brighter (e.g., `0.8`); negative = darker (e.g., `-0.5`). Range: `-1.0` to `1.0` |
+| `BASE_PORT` / `NUM_SERVERS` | Must match running inference servers |
 
-**Run:**
 ```bash
+conda activate stereonav_test
 bash evaluation/robustness_eval_p_perturbation.sh
 ```
 
@@ -275,17 +291,16 @@ bash evaluation/robustness_eval_p_perturbation.sh
 
 ### 3.2 Camera Height Fluctuation
 
-Test robustness to camera height variations.
+Simulates vertical camera displacement caused by uneven terrain or robot body oscillation during locomotion.
 
-**Configuration:**
-- Edit `evaluation/robustness_eval_p_fluctuation.sh`:
-  - Set `HEIGHT_OFFSET` (meters) — vertical camera displacement:
-    - `0.0` = default height (1.25m)
-    - Positive values (e.g., `0.6`) = higher camera
-    - Negative values (e.g., `-0.6`) = lower camera
+**Configuration** — edit `evaluation/robustness_eval_p_fluctuation.sh`:
+| Parameter | Description |
+|---|---|
+| `HEIGHT_OFFSET` | Vertical displacement in meters relative to the default camera height (1.25m). Positive = higher (e.g., `0.6`); negative = lower (e.g., `-0.6`) |
+| `BASE_PORT` / `NUM_SERVERS` | Must match running inference servers |
 
-**Run:**
 ```bash
+conda activate stereonav_test
 bash evaluation/robustness_eval_p_fluctuation.sh
 ```
 
@@ -293,15 +308,17 @@ bash evaluation/robustness_eval_p_fluctuation.sh
 
 ### 3.3 Rotation Deviation
 
-Test robustness to viewpoint rotation errors.
+Simulates viewpoint perturbations caused by imprecise rotation execution or IMU drift, by randomly rotating the agent's heading at each step.
 
-**Configuration:**
-- Edit `evaluation/robustness_eval_p_fix_deviation.sh`:
-  - Set `ROTATION_PERTURBATION` (degrees) — random rotation range per step (e.g., `30` = ±30° deviation)
-  - Set `PERTURBATION_PROBABILITY` (0-1) — probability of applying perturbation each step
+**Configuration** — edit `evaluation/robustness_eval_p_fix_deviation.sh`:
+| Parameter | Description |
+|---|---|
+| `ROTATION_PERTURBATION` | Maximum random rotation applied per step in degrees (e.g., `30` = ±30° deviation) |
+| `PERTURBATION_PROBABILITY` | Probability of applying the perturbation at each step. Range: `0.0` to `1.0` |
+| `BASE_PORT` / `NUM_SERVERS` | Must match running inference servers |
 
-**Run:**
 ```bash
+conda activate stereonav_test
 bash evaluation/robustness_eval_p_fix_deviation.sh
 ```
 
@@ -309,16 +326,16 @@ bash evaluation/robustness_eval_p_fix_deviation.sh
 
 ### 3.4 Motion Blur
 
-Test robustness to motion blur.
+Simulates motion blur caused by fast camera movement or robot vibration, by applying a blur kernel to input frames.
 
-**Configuration:**
-- Edit `evaluation/robustness_eval_p_fix_blur.sh`:
-  - Set `MOTION_BLUR_STRENGTH` — blur intensity:
-    - `0.0` = no blur
-    - Higher values = stronger blur (e.g., `1.0`)
+**Configuration** — edit `evaluation/robustness_eval_p_fix_blur.sh`:
+| Parameter | Description |
+|---|---|
+| `MOTION_BLUR_STRENGTH` | Blur intensity. `0.0` = no blur; higher values = stronger blur (e.g., `1.0` = strong blur) |
+| `BASE_PORT` / `NUM_SERVERS` | Must match running inference servers |
 
-**Run:**
 ```bash
+conda activate stereonav_test
 bash evaluation/robustness_eval_p_fix_blur.sh
 ```
 
@@ -326,43 +343,46 @@ bash evaluation/robustness_eval_p_fix_blur.sh
 
 ## 4. Instruction Ambiguity Analysis (Optional)
 
-Analyze instruction ambiguity using VLM evaluation.
+Analyzes the degree of ambiguity in navigation instructions using a VLM judge. This produces per-episode ambiguity scores that can be used to study the correlation between instruction clarity and navigation performance.
+
+**Environment:** `stereonav_test`
 
 ### Step 1: Generate Trajectory Data
 
-Generate ground-truth trajectory frames for analysis:
-
+Generate ground-truth trajectory frames for the R2R validation set:
 ```bash
+conda activate stereonav_test
 bash evaluation/cache/gen_data.sh
 ```
-
-This creates trajectory data in `evaluation/cache/result_r2r_*` directories.
+Output is saved to `evaluation/cache/result_r2r_*/`.
 
 ### Step 2: Run VLM Evaluation
 
-**Configuration:**
-- Set your OpenAI API key:
-  ```bash
-  export OPENAI_API_KEY="your-api-key"
-  ```
-- Edit `evaluation/pilot_eval_instruction_ambiguity.sh`:
-  - Adjust `MODEL` (e.g., `gpt-4o`, `claude-opus-4-7`, `gemini-2.5-pro`)
-  - Optionally set `BASE_URL` for custom API endpoints
+Configure and run the VLM judge:
 
-**Run:**
+```bash
+export OPENAI_API_KEY="your-api-key"
+```
+
+Edit `evaluation/pilot_eval_instruction_ambiguity.sh`:
+| Parameter | Description |
+|---|---|
+| `MODEL` | VLM model to use as judge (e.g., `gpt-4o`, `claude-opus-4-7`, `gemini-2.5-pro`) |
+| `BASE_URL` | (Optional) Custom API endpoint for the VLM |
+
 ```bash
 bash evaluation/pilot_eval_instruction_ambiguity.sh
 ```
 
-**Output:** JSONL files with directional and docking ambiguity scores per episode.
+**Output:** JSONL files with per-episode directional and docking ambiguity scores.
 
 ---
 
 ## Results
 
 All evaluation results are saved to `./results/` by default. Each run generates:
-- `result.json` — per-episode metrics and final summary
-- Optional: top-down map videos (if `SAVE_VIDEO=true`)
+- `result.json` — per-episode metrics and aggregate summary
+- Top-down map videos (optional, set `SAVE_VIDEO=true` in the evaluation script)
 
 
 # 🚀 Training
