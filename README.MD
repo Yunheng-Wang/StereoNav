@@ -158,8 +158,8 @@ Download the checkpoints from [HuggingFace](https://huggingface.co/anonymous-ste
 | Checkpoint | Description |
 |---|---|
 | `InternVL3_5-2B` | Base MLLM backbone |
-| `dinov2_large` | 2D semantic encoder |
-| `edgenext_small` | 2D structural encoder |
+| `dinov2_large` | 2D structural encoder |
+| `edgenext_small` | component required by FoundationStereo |
 | `foundationstereo` | 3D geometry encoder (pre-trained) |
 | `stereonav_stage1` | StereoNav Stage 1 checkpoint |
 | `stereonav_stage2` | StereoNav Stage 2 checkpoint — ready for evaluation or fine-tuning |
@@ -375,8 +375,8 @@ Before training, complete [Step 2 (Checkpoints)](#step-2-download-model-checkpoi
 
 **Required checkpoints** (place under `checkpoints/`):
 - `InternVL3_5-2B` — base MLLM backbone
-- `dinov2_large` — 2D semantic encoder
-- `edgenext_small` — 2D structural encoder
+- `dinov2_large` — 2D structural encoder
+- `edgenext_small` — component required by FoundationStereo
 - `foundationstereo` — 3D geometry encoder
 
 **Required training data** (place under `data/cache/train/`):

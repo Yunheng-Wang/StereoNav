@@ -5,8 +5,8 @@ from typing import Optional, Tuple
 
 @dataclass
 class FoundationStereoConfig:
-    checkpoint_path: str = "/home/CONNECT/yfang870/yunhengwang/StereoVLN_InternVL_3_5_2_B/model/base/FoundationStereo/checkpoints/23-51-11"
-    edgenext_path: str = "/home/CONNECT/yfang870/yunhengwang/StereoVLN_InternVL_3_5_2_B/checkpoints/edgenext_small/model.safetensors"
+    checkpoint_path: str = "checkpoints/23-51-11"
+    edgenext_path: str = "checkpoints/edgenext_small/model.safetensors"
     dtype: torch.dtype = torch.bfloat16
     dim: int = 2048
 
