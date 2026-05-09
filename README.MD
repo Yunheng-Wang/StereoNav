@@ -19,9 +19,9 @@
     <a href="">Yixiao Feng</a><sup>1</sup>
     ·
     <a href="">Jiaxi Zhang</a><sup>1</sup>
-    <br/>
-    <a href="">Wei Lu</a><sup>1</sup>
     ·
+    <a href="">Wei Lu</a><sup>1</sup>
+    <br/>
     <a href="">Zecui Zeng</a><sup>2,†</sup>
     ·
     <a href="">Renjing Xu</a><sup>1,†</sup>
@@ -66,7 +66,7 @@ Vision-and-Language Navigation (VLN) is a cornerstone of embodied intelligence. 
 
 ---
 
-# Installation
+# 🛠️ Installation
 
 ## Clone the Repository
 
@@ -103,6 +103,8 @@ pip install flash_attn-*.whl
 pip install triton
 ```
 
+
+
 ---
 
 ## Environment 2: Evaluation (`stereonav_test`)
@@ -123,10 +125,78 @@ pip install -e habitat-baselines
 cd ..
 ```
 
+## Data Preparation
+
+### Step 1: Download Scene Data
+
+Download the **MP3D** scenes from [Matterport3D](https://niessner.github.io/Matterport/) and the **HM3D** scenes from [HM3D](https://github.com/matterport/habitat-matterport-3dresearch), then place them under `data/scene/`:
+
+```
+data/scene/
+├── hm3d/
+│   ├── 00000-kfPV7w3FaU5/
+│   ├── 00001-UVdNNRcVyV1/
+│   ├── 00864-QHhQZWdMpGJ/
+│   │   ├── QHhQZWdMpGJ.basis.glb
+│   │   └── QHhQZWdMpGJ.basis.navmesh
+│   └── ...
+└── mp3d/
+    ├── 17DRP5sb8fy/
+    ├── 1LXtFkjw3qL/
+    ├── zsNo4HB9uLZ/
+    │   ├── zsNo4HB9uLZ.glb
+    │   ├── zsNo4HB9uLZ.house
+    │   ├── zsNo4HB9uLZ.navmesh
+    │   └── zsNo4HB9uLZ_semantic.ply
+    └── ...
+```
+
+### Step 2: Download Model Checkpoints
+
+Download the checkpoints from [HuggingFace](https://huggingface.co/anonymous-stereonav/StereoNav_Model) and place them under `checkpoints/`:
+
+| Checkpoint | Description |
+|---|---|
+| `InternVL3_5-2B` | Base MLLM backbone |
+| `dinov2_large` | 2D semantic encoder |
+| `edgenext_small` | 2D structural encoder |
+| `foundationstereo` | 3D geometry encoder (pre-trained) |
+| `stereonav_stage1` | StereoNav Stage 1 checkpoint |
+| `stereonav_stage2` | StereoNav Stage 2 checkpoint — ready for evaluation or fine-tuning |
+
+### Step 3: Prepare Training Data
+
+**Option 1: Generate from scratch**
+```bash
+bash data/gen_trajectory.sh
+```
+This generates Stage 1 data (R2R, RxR) and Stage 2 data (ScaleVLN).
+
+**Option 2: Download pre-processed data (recommended)**
+
+Download from [HuggingFace](https://huggingface.co/datasets/YunhengWang/StereoNav_DataSet) and place under `data/cache/`:
+
+```
+data/cache/
+└── train/
+    ├── R2R/                    # same structure for RxR and ScaleVLN
+    │   ├── images/
+    │   ├── annotations_*.json
+    │   ├── summary.json
+    │   ├── baseline.txt
+    │   └── intrinsics.txt
+    ├── RxR/
+    ├── ScaleVLN/
+    └── dagger/
+        ├── R2R/
+        ├── RxR/
+        ├── baseline.txt
+        └── intrinsics.txt
+```
 
 
 
-# Evaluation
+# 🧪 Evaluation
 
 ## Prerequisites: Start Inference Servers
 
@@ -293,22 +363,83 @@ All evaluation results are saved to `./results/` by default. Each run generates:
 - Optional: top-down map videos (if `SAVE_VIDEO=true`)
 
 
-# Training
+# 🚀 Training
 
 ## Data Preparation
 
-**Option 1: Generate data yourself**
+Training data can be either generated locally or downloaded from HuggingFace.
+
+**Option 1: Generate from scratch**
 ```bash
 bash data/gen_trajectory.sh
 ```
-This generates Stage 1 data (R2R, RxR) and Stage 2 data (ScaleVLN).
+This script generates all training data for Stage 1 (R2R, RxR) and Stage 2 (ScaleVLN via DAgger).
 
-**Option 2: Download pre-processed data**
+**Option 2: Download pre-processed data (recommended)**
+
+Download directly from HuggingFace and place under `data/cache/`:
 ```
 https://huggingface.co/datasets/YunhengWang/StereoNav_DataSet
 ```
 
----
+The expected data directory structure is:
+```
+data/cache/
+└── train/
+    ├── R2R/
+    │   ├── images/
+    │   ├── annotations_*.json
+    │   ├── summary.json
+    │   ├── baseline.txt
+    │   └── intrinsics.txt
+    ├── RxR/
+    │   ├── images/
+    │   ├── annotations_*.json
+    │   ├── summary.json
+    │   ├── baseline.txt
+    │   └── intrinsics.txt
+    ├── ScaleVLN/
+    │   ├── images/
+    │   ├── annotations_*.json
+    │   ├── summary.json
+    │   ├── baseline.txt
+    │   └── intrinsics.txt
+    └── dagger/
+        ├── R2R/
+        ├── RxR/
+        ├── baseline.txt
+        └── intrinsics.txt
+```
+
+## Model Checkpoints
+
+Download all required checkpoints from HuggingFace and place under `checkpoints/`:
+```
+https://huggingface.co/YunhengWang/StereoNav_Model
+```
+
+The expected checkpoint directory structure is:
+```
+checkpoints/
+├── InternVL3_5-2B/          # Base MLLM backbone
+│   ├── model.safetensors
+│   ├── config.json
+│   └── tokenizer.json, ...
+├── dinov2_large/             # 2D semantic encoder
+│   └── model.safetensors
+├── edgenext_small/           # 2D structural encoder
+│   └── model.safetensors
+├── foundationstereo/         # 3D geometry encoder
+│   └── ...
+├── stereonav_stage1/         # StereoNav Stage 1 checkpoint
+│   ├── model.safetensors
+│   └── config.json, ...
+└── stereonav_stage2/         # StereoNav Stage 2 checkpoint (final)
+    ├── model.safetensors
+    └── config.json, ...
+```
+
+
 
 ## Stage 1 Training
 
