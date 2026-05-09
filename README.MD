@@ -2,36 +2,42 @@
   <img src="asset/logo.png" alt="StereoNav Logo" width="120"/>
   <h2 align="center"> What Limits Vision-and-Language Navigation? </h2>
   <p align="center">
-    <a href="">Yunheng Wang</a><sup>1,*</sup>
-    .
-    <a href="">Yuetong Fang</a><sup>1,*</sup>
-    .
-    <a href="">Taowen Wang</a><sup>1,*</sup>
-    .
+    <a href="">Yunheng Wang</a><sup>1</sup>
+    ·
+    <a href="">Yuetong Fang</a><sup>1</sup>
+    ·
+    <a href="">Taowen Wang</a><sup>1</sup>
+    ·
     <a href="">Lusong Li</a><sup>2</sup>
-    .
+    ·
     <a href="">Kun Liu</a><sup>2</sup>
-    .
+    ·
     <a href="">Junzhe Xu</a><sup>1,2</sup>
     <br/>
     <a href="">Zizhao Yuan</a><sup>1</sup>
-    .
+    ·
     <a href="">Yixiao Feng</a><sup>1</sup>
-    .
+    ·
     <a href="">Jiaxi Zhang</a><sup>1</sup>
-    .
+    <br/>
     <a href="">Wei Lu</a><sup>1</sup>
-    .
+    ·
     <a href="">Zecui Zeng</a><sup>2,†</sup>
-    .
+    ·
     <a href="">Renjing Xu</a><sup>1,†</sup>
   </p>
 
   <p align="center"> <strong>Under Review</strong></p>
 
   <p align="center">
-    <sup>1</sup>The Hong Kong University of Science and Technology (Guangzhou) · 
+    <sup>1</sup>HKUST(GZ) · 
     <sup>2</sup>JD Explore Academy
+  </p>
+
+  <p align="center">
+    <img src="asset/HKUSTGZ_logo.svg" alt="HKUST(GZ)" height="40"/>
+    &nbsp;&nbsp;&nbsp;
+    <img src="asset/JD_logo.png" alt="JD Explore Academy" height="40"/>
   </p>
 
   <p align="center">
