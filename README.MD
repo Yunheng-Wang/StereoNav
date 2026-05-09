@@ -243,7 +243,7 @@ conda activate stereonav_test
 bash evaluation/accuracy_eval_p_exact.sh
 ```
 
-**Metrics:** Success Rate (SR), SPL, Oracle Success Rate, Navigation Error (NE), Trajectory Length (TL)
+**Metrics:** Success Rate (SR), SPL, Oracle Success Rate, Navigation Error (NE), Trajectory Length (TL), nDTW
 
 ---
 
@@ -272,41 +272,7 @@ bash evaluation/accuracy_eval_p_coarse.sh
 
 These evaluations test the agent's resilience to various visual and physical perturbations that commonly occur in real-world deployment. All four sub-evaluations use the `stereonav_test` environment.
 
-### 3.1 Lighting Perturbation
-
-Simulates lighting condition changes (e.g., overexposure, underexposure) by applying a global brightness offset to all input frames.
-
-**Configuration** — edit `evaluation/robustness_eval_p_perturbation.sh`:
-| Parameter | Description |
-|---|---|
-| `LIGHT_PERTURBATION` | Brightness offset applied to each frame. `0.0` = no change; positive = brighter (e.g., `0.8`); negative = darker (e.g., `-0.5`). Range: `-1.0` to `1.0` |
-| `BASE_PORT` / `NUM_SERVERS` | Must match running inference servers |
-
-```bash
-conda activate stereonav_test
-bash evaluation/robustness_eval_p_perturbation.sh
-```
-
----
-
-### 3.2 Camera Height Fluctuation
-
-Simulates vertical camera displacement caused by uneven terrain or robot body oscillation during locomotion.
-
-**Configuration** — edit `evaluation/robustness_eval_p_fluctuation.sh`:
-| Parameter | Description |
-|---|---|
-| `HEIGHT_OFFSET` | Vertical displacement in meters relative to the default camera height (1.25m). Positive = higher (e.g., `0.6`); negative = lower (e.g., `-0.6`) |
-| `BASE_PORT` / `NUM_SERVERS` | Must match running inference servers |
-
-```bash
-conda activate stereonav_test
-bash evaluation/robustness_eval_p_fluctuation.sh
-```
-
----
-
-### 3.3 Rotation Deviation
+### 3.1 Rotation Deviation
 
 Simulates viewpoint perturbations caused by imprecise rotation execution or IMU drift, by randomly rotating the agent's heading at each step.
 
@@ -324,7 +290,7 @@ bash evaluation/robustness_eval_p_fix_deviation.sh
 
 ---
 
-### 3.4 Motion Blur
+### 3.2 Motion Blur
 
 Simulates motion blur caused by fast camera movement or robot vibration, by applying a blur kernel to input frames.
 
@@ -337,6 +303,40 @@ Simulates motion blur caused by fast camera movement or robot vibration, by appl
 ```bash
 conda activate stereonav_test
 bash evaluation/robustness_eval_p_fix_blur.sh
+```
+
+---
+
+### 3.3 Lighting Perturbation
+
+Simulates lighting condition changes (e.g., overexposure, underexposure) by applying a global brightness offset to all input frames.
+
+**Configuration** — edit `evaluation/robustness_eval_p_perturbation.sh`:
+| Parameter | Description |
+|---|---|
+| `LIGHT_PERTURBATION` | Brightness offset applied to each frame. `0.0` = no change; positive = brighter (e.g., `0.8`); negative = darker (e.g., `-0.5`). Range: `-1.0` to `1.0` |
+| `BASE_PORT` / `NUM_SERVERS` | Must match running inference servers |
+
+```bash
+conda activate stereonav_test
+bash evaluation/robustness_eval_p_perturbation.sh
+```
+
+---
+
+### 3.4 Camera Height Fluctuation
+
+Simulates vertical camera displacement caused by uneven terrain or robot body oscillation during locomotion.
+
+**Configuration** — edit `evaluation/robustness_eval_p_fluctuation.sh`:
+| Parameter | Description |
+|---|---|
+| `HEIGHT_OFFSET` | Vertical displacement in meters relative to the default camera height (1.25m). Positive = higher (e.g., `0.6`); negative = lower (e.g., `-0.6`) |
+| `BASE_PORT` / `NUM_SERVERS` | Must match running inference servers |
+
+```bash
+conda activate stereonav_test
+bash evaluation/robustness_eval_p_fluctuation.sh
 ```
 
 ---
