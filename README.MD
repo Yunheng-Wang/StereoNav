@@ -381,7 +381,7 @@ Before training, complete [Step 2 (Checkpoints)](#step-2-download-model-checkpoi
 
 **Required training data** (place under `data/cache/train/`):
 - `R2R/`, `RxR/` — for Stage 1
-- `ScaleVLN/`, `dagger/` — for Stage 2
+- `R2R/`, `RxR/`, `ScaleVLN/`, `dagger/` — for Stage 2
 
 ---
 
@@ -408,8 +408,12 @@ Stage 2 jointly trains on R2R, RxR, ScaleVLN, and DAgger data. It requires first
 
 ### Step 1: Collect DAgger Data
 
-DAgger data is collected by running the Stage 1 model in the simulator and recording corrected trajectories for R2R and RxR.
+DAgger data is collected by running the Stage 1 model in the simulator and recording corrected trajectories for R2R and RxR. This step requires **two separate terminals**.
 
+**Terminal 1** — Start the inference server (using the `stereonav_train` environment):
+```bash
+conda activate stereonav_train
+```
 1. Edit `scripts/server.sh`:
    - Set `CHECKPOINT_PATH` to your Stage 1 checkpoint directory
    - Set `BASE_PORT` (default: `7200`) and `NUM_GPUS` (default: `8`)
@@ -419,7 +423,11 @@ DAgger data is collected by running the Stage 1 model in the simulator and recor
    bash scripts/server.sh
    ```
 
-3. Collect DAgger data (ensure `BASE_PORT` and `NUM_GPUS` in `data/dagger.sh` match the servers):
+**Terminal 2** — Collect DAgger trajectories (using the `stereonav_test` environment):
+```bash
+conda activate stereonav_test
+```
+3. Ensure `BASE_PORT` and `NUM_GPUS` in `data/dagger.sh` match the running servers, then run:
    ```bash
    bash data/dagger.sh
    ```
