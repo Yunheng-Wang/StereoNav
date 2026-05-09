@@ -378,11 +378,6 @@ bash evaluation/pilot_eval_instruction_ambiguity.sh
 
 ---
 
-## Results
-
-All evaluation results are saved to `./results/` by default. Each run generates:
-- `result.json` — per-episode metrics and aggregate summary
-- Top-down map videos (optional, set `SAVE_VIDEO=true` in the evaluation script)
 
 
 # 🚀 Training
