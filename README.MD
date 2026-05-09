@@ -1,58 +1,51 @@
 <p align="center">
   <img src="asset/logo.png" alt="StereoNav Logo" width="80"/>
-  <h1 align="center"> What Limits Vision-and-Language Navigation? </h1>
-  <p align="center">
-    <a href="">Yunheng Wang</a><sup>1</sup>
-    ·
-    <a href="">Yuetong Fang</a><sup>1</sup>
-    ·
-    <a href="">Taowen Wang</a><sup>1</sup>
-    ·
-    <a href="">Lusong Li</a><sup>2</sup>
-    ·
-    <a href="">Kun Liu</a><sup>2</sup>
-    ·
-    <a href="">Junzhe Xu</a><sup>1,2</sup>
-    <br/>
-    <a href="">Zizhao Yuan</a><sup>1</sup>
-    ·
-    <a href="">Yixiao Feng</a><sup>1</sup>
-    ·
-    <a href="">Jiaxi Zhang</a><sup>1</sup>
-    ·
-    <a href="">Wei Lu</a><sup>1</sup>
-    <br/>
-    <a href="">Zecui Zeng</a><sup>2,†</sup>
-    ·
-    <a href="">Renjing Xu</a><sup>1,†</sup>
-  </p>
-
-  <p align="center"> <strong>Under Review</strong></p>
-
-  <p align="center">
-    <sup>1</sup>HKUST(GZ) · 
-    <sup>2</sup>JD Explore Academy
-  </p>
-
-  <p align="center">
-    <img src="asset/HKUSTGZ_logo.svg" alt="HKUST(GZ)" height="40"/>
-    &nbsp;&nbsp;&nbsp;
-    <img src="asset/JD_logo.png" alt="JD Explore Academy" height="40"/>
-  </p>
-
-  <p align="center">
-    <a href=""><img src="https://img.shields.io/badge/arXiv-Paper-b31b1b?logo=arxiv" alt="arXiv"></a>
-    <a href=""><img src="https://img.shields.io/badge/🚀_Project_Page-StereoNav-blue" alt="Project Page"></a>
-    <a href="https://huggingface.co/datasets/YunhengWang/StereoNav_DataSet"><img src="https://img.shields.io/badge/🤗_Dataset-StereoNav_DataSet-yellow" alt="Dataset"></a>
-    <a href="https://huggingface.co/YunhengWang/StereoNav_Model"><img src="https://img.shields.io/badge/🤗_Checkpoints-StereoNav_Model-yellow" alt="Checkpoints"></a>
-    <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License: MIT"></a>
-  </p>
-
-  <p align="center">
-    <img src="asset/main.png" alt="Overview of StereoNav" width="900"/>
-  </p>
-  <p align="center"><strong>Overview of StereoNav</strong></p>
 </p>
+
+<h1 align="center">What Limits Vision-and-Language Navigation?</h1>
+
+<p align="center">
+  <a href="">Yunheng Wang</a><sup>1</sup> ·
+  <a href="">Yuetong Fang</a><sup>1</sup> ·
+  <a href="">Taowen Wang</a><sup>1</sup> ·
+  <a href="">Lusong Li</a><sup>2</sup> ·
+  <a href="">Kun Liu</a><sup>2</sup> ·
+  <a href="">Junzhe Xu</a><sup>1,2</sup>
+  <br/>
+  <a href="">Zizhao Yuan</a><sup>1</sup> ·
+  <a href="">Yixiao Feng</a><sup>1</sup> ·
+  <a href="">Jiaxi Zhang</a><sup>1</sup> ·
+  <a href="">Wei Lu</a><sup>1</sup>
+  <br/>
+  <a href="">Zecui Zeng</a><sup>2,†</sup> ·
+  <a href="">Renjing Xu</a><sup>1,†</sup>
+</p>
+
+<p align="center"><strong>Under Review</strong></p>
+
+<p align="center">
+  <sup>1</sup>HKUST(GZ) · <sup>2</sup>JD Explore Academy
+</p>
+
+<p align="center">
+  <img src="asset/HKUSTGZ_logo.svg" alt="HKUST(GZ)" height="40"/>
+  &nbsp;&nbsp;&nbsp;
+  <img src="asset/JD_logo.png" alt="JD Explore Academy" height="40"/>
+</p>
+
+<p align="center">
+  <a href=""><img src="https://img.shields.io/badge/arXiv-Paper-b31b1b?logo=arxiv" alt="arXiv"></a>
+  <a href=""><img src="https://img.shields.io/badge/🚀_Project_Page-StereoNav-blue" alt="Project Page"></a>
+  <a href="https://huggingface.co/datasets/YunhengWang/StereoNav_DataSet"><img src="https://img.shields.io/badge/🤗_Dataset-StereoNav_DataSet-yellow" alt="Dataset"></a>
+  <a href="https://huggingface.co/YunhengWang/StereoNav_Model"><img src="https://img.shields.io/badge/🤗_Checkpoints-StereoNav_Model-yellow" alt="Checkpoints"></a>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License: MIT"></a>
+</p>
+
+<p align="center">
+  <img src="asset/main.png" alt="Overview of StereoNav" width="900"/>
+</p>
+<p align="center"><strong>Overview of StereoNav</strong></p>
+
 
 ## News
 
