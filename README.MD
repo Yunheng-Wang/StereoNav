@@ -575,3 +575,31 @@ bash real_world/deployment.sh
 ```
 
 The controller will parse the instruction, fetch stereo frames from the ZED server, query the inference server for actions, and send them to the robot — repeating until a stop action is predicted or `MAX_STEPS` is reached.
+
+---
+
+## Acknowledgements
+
+We thank the following open-source projects for their valuable contributions to this work:
+
+- [StreamVLN](https://github.com/InternRobotics/StreamVLN)
+- [JanusVLN](https://github.com/MIV-XJTU/JanusVLN)
+- [NaVILA](https://github.com/AnjieCheng/NaVILA)
+- [StereoVLA](https://github.com/shengliangd/StereoVLA)
+- [TWIST2](https://github.com/amazon-far/TWIST2)
+- [Unitree Robotics](https://github.com/unitreerobotics)
+
+---
+
+## Citation
+
+If you find this work useful, please consider citing:
+
+```bibtex
+@article{stereonav2026,
+  title     = {What Limits Vision-and-Language Navigation?},
+  author    = {Yunheng Wang and Yuetong Fang and Taowen Wang and Lusong Li and Kun Liu and Junzhe Xu and Zizhao Yuan and Yixiao Feng and Jiaxi Zhang and Wei Lu and Zecui Zeng and Renjing Xu},
+  journal   = {arXiv preprint},
+  year      = {2026},
+}
+```
