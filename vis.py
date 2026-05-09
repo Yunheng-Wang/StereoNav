@@ -5,7 +5,9 @@ import argparse
 import numpy as np
 import cv2
 import torch
+import quaternion
 import torchvision.transforms as transforms
+from PIL import Image, ImageDraw
 
 _root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(_root)
@@ -21,21 +23,118 @@ from habitat.config.default_structured_configs import (
     TopDownMapMeasurementConfig,
 )
 from data.utils import measures  # noqa: F401
+from data.utils import rxr_dataset  # noqa: F401  (registers RxRVLN-v1)
 from scripts.client import StereoVLNClient
 
 _to_tensor = transforms.ToTensor()
+_to_pil = transforms.ToPILImage()
 IMAGE_SIZE = (448, 448)
+IMG_W, IMG_H = 448, 448
+HFOV_DEG = 79
+CAMERA_OFFSET_LEFT = np.array([-0.05, 1.25, 0.0])
+CAMERA_OFFSET_RIGHT = np.array([0.05, 1.25, 0.0])
+
+
+def get_camera_intrinsics(width, height, hfov_deg):
+    hfov_rad = np.deg2rad(hfov_deg)
+    fx = width / (2.0 * np.tan(hfov_rad / 2.0))
+    fy = fx
+    cx = width / 2.0
+    cy = height / 2.0
+    return np.array([[fx, 0, cx], [0, fy, cy], [0, 0, 1]])
+
+
+K_INTRINSIC = get_camera_intrinsics(IMG_W, IMG_H, HFOV_DEG)
+
+
+def project_3d_to_2d(world_point, agent_position, agent_rotation, camera_offset, K, width, height):
+    """Project 3D world point to (u, v_bottom_left, cam_x). u/v=None if behind camera."""
+    R_agent = quaternion.as_rotation_matrix(agent_rotation)
+    camera_position = agent_position + R_agent @ camera_offset
+    point_rel = world_point - camera_position
+    point_cam_opengl = R_agent.T @ point_rel
+    point_cam = point_cam_opengl.copy()
+    point_cam[2] = -point_cam_opengl[2]  # OpenGL -> CV
+    cam_x = point_cam[0]
+    if point_cam[2] <= 0:
+        return None, None, cam_x
+    point_2d = K @ point_cam
+    u = point_2d[0] / point_2d[2]
+    v_bottom_left = height - (point_2d[1] / point_2d[2])
+    return u, v_bottom_left, cam_x
+
+
+def clip_to_image_bounds(u, v, width, height, cam_x):
+    v_center = height / 2.0
+    if u is None or v is None:
+        return (0.0, v_center) if cam_x < 0 else (width - 1.0, v_center)
+    out_of_view_threshold = 0.2
+    u_margin = width * out_of_view_threshold
+    v_margin = height * out_of_view_threshold
+    if u < -u_margin or u > width - 1 + u_margin or v < -v_margin or v > height - 1 + v_margin:
+        return (0.0, v_center) if cam_x < 0 else (width - 1.0, v_center)
+    return float(np.clip(u, 0, width - 1)), float(np.clip(v, 0, height - 1))
+
+
+def project_goal_to_stereo(env, goal_position):
+    """Returns ((u, v_bottom_left), (u, v_bottom_left)) for left/right cameras."""
+    state = env.sim.get_agent_state()
+    agent_pos = np.array(state.position)
+    agent_rot = state.rotation
+    goal_camera_center = goal_position + np.array([0.0, 1.25, 0.0])
+
+    ul, vl, cxl = project_3d_to_2d(goal_camera_center, agent_pos, agent_rot,
+                                   CAMERA_OFFSET_LEFT, K_INTRINSIC, IMG_W, IMG_H)
+    ul, vl = clip_to_image_bounds(ul, vl, IMG_W, IMG_H, cxl)
+
+    ur, vr, cxr = project_3d_to_2d(goal_camera_center, agent_pos, agent_rot,
+                                   CAMERA_OFFSET_RIGHT, K_INTRINSIC, IMG_W, IMG_H)
+    ur, vr = clip_to_image_bounds(ur, vr, IMG_W, IMG_H, cxr)
+    return (ul, vl), (ur, vr)
+
+
+def draw_point_on_tensor(frame_tensor, point, radius=5):
+    """Draw red dot on [1,3,H,W] uint8-range tensor. point=(u, v_bottom_left)."""
+    if point is None:
+        return frame_tensor
+    img = _to_pil(frame_tensor.squeeze(0) / 255.0)
+    draw = ImageDraw.Draw(img)
+    u = float(point[0])
+    v_top_left = IMG_H - float(point[1])
+    draw.ellipse(
+        [(u - radius, v_top_left - radius), (u + radius, v_top_left + radius)],
+        fill='red', outline='red',
+    )
+    tensor = _to_tensor(img) * 255.0
+    return tensor.unsqueeze(0)
 
 
 def depth_to_colormap(depth_tensor):
-    """depth_tensor: [H, W] float, any range -> BGR colormap (INFERNO)."""
+    """depth_tensor: [H, W] float, any range -> BGR colormap.
+    Matches the depth-vis style: matplotlib INFERNO with 2-98 percentile
+    normalization so outliers don't wash out the contrast.
+    """
+    import matplotlib
+    matplotlib.use('Agg')
+    from matplotlib import cm
+
     d = depth_tensor.float().cpu().numpy()
-    mn, mx = d.min(), d.max()
-    if mx - mn < 1e-6:
-        d_norm = np.zeros_like(d, dtype=np.uint8)
+    finite = np.isfinite(d)
+    if finite.any():
+        valid = d[finite]
+        mn = float(np.percentile(valid, 2))
+        mx = float(np.percentile(valid, 98))
     else:
-        d_norm = ((d - mn) / (mx - mn) * 255).astype(np.uint8)
-    return cv2.applyColorMap(d_norm, cv2.COLORMAP_INFERNO)
+        mn, mx = 0.0, 1.0
+    if mx - mn < 1e-6:
+        d_norm = np.zeros_like(d, dtype=np.float32)
+    else:
+        d_norm = np.clip((d - mn) / (mx - mn), 0.0, 1.0)
+    # Invert so near=bright, far=dark (matches typical depth visualizations).
+    d_norm = 1.0 - d_norm
+    rgba = cm.inferno(d_norm)  # [H, W, 4] float in [0, 1]
+    rgb = (rgba[:, :, :3] * 255).astype(np.uint8)
+    return cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
 
 
 def build_config(config_path, split, data_path=None, scenes_dir=None):
@@ -85,7 +184,6 @@ def sample_episodes(env, num_samples):
 
 def preprocess_rgb(rgb_np):
     """numpy HxWx3 uint8 -> [1, 3, 448, 448] float tensor 0~255"""
-    from PIL import Image
     img = Image.fromarray(rgb_np).convert('RGB').resize(IMAGE_SIZE, Image.BILINEAR)
     return (_to_tensor(img) * 255.0).unsqueeze(0)
 
@@ -95,6 +193,7 @@ def run_episode(env, episode, model, max_steps, output_dir, tag, history_num, ex
     obs = env.reset()
 
     instruction = episode.instruction.instruction_text if hasattr(episode, 'instruction') else ""
+    goal_position = np.array(episode.goals[0].position)
 
     stereo_frames = []
     depth_frames = []
@@ -110,6 +209,11 @@ def run_episode(env, episode, model, max_steps, output_dir, tag, history_num, ex
     while not env.episode_over and step < max_steps:
         left_t = preprocess_rgb(obs['rgb_left'][:, :, :3])   # [1,3,448,448]
         right_t = preprocess_rgb(obs['rgb_right'][:, :, :3])
+
+        # Render goal point onto stereo views (matches training/eval input).
+        left_point, right_point = project_goal_to_stereo(env, goal_position)
+        left_t = draw_point_on_tensor(left_t, left_point)
+        right_t = draw_point_on_tensor(right_t, right_point)
 
         # Build history tensors
         def build_hist(frames):

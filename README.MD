@@ -1,4 +1,5 @@
 <p align="center">
+  <img src="StereoVLN_InternVL_3_5_2_B/asset/logo.png" alt="StereoNav Logo" width="200"/>
   <h2 align="center"> What Limits Vision-and-Language Navigation? </h2>
   <p align="center">
     <a href="">Yunheng Wang</a><sup>1</sup>
@@ -40,8 +41,18 @@
     <a href="https://huggingface.co/YunhengWang/StereoNav_Model"><img src="https://img.shields.io/badge/🤗_Checkpoints-StereoNav_Model-yellow" alt="Checkpoints"></a>
     <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License: MIT"></a>
   </p>
+
+  <p align="center">
+    <img src="StereoVLN_InternVL_3_5_2_B/asset/main.png" alt="Overview of StereoNav" width="900"/>
+  </p>
+  <p align="center"><em>Overview of StereoNav. StereoNav takes stereo RGB observations, a navigation instruction, and a target-location prior as input. The target prior is rendered as persistent visual guidance, while stereo observations are encoded into unified semantic, structural, and geometric tokens through 2D semantic, 2D structural, and 3D geometry encoders. These tokens are then processed by the MLLM for joint action and depth prediction. The right panels illustrate detailed designs of selected modules.</em></p>
 </p>
 
+## Abstract
+
+Vision-and-Language Navigation (VLN) is a cornerstone of embodied intelligence. However, current agents often suffer from significant performance degradation when transitioning from simulation to real-world deployment, primarily due to perceptual instability (e.g., lighting variations and motion blur) and under-specified instructions. While existing methods attempt to bridge this gap by scaling up model size and training data, we argue that the bottleneck lies in the lack of robust spatial grounding and cross-domain priors. In this paper, we propose StereoNav, a robust Vision-Language-Action framework designed to enhance real-world navigation consistency. To address the inherent gap between synthetic training and physical execution, we introduce Target-Location Priors as a persistent bridge. These priors provide stable visual guidance that remains invariant across domains, effectively grounding the agent even when instructions are vague. Furthermore, to mitigate visual disturbances like motion blur and illumination shifts, StereoNav leverages stereo vision to construct a unified representation of semantics and geometry, enabling precise action prediction through enhanced depth awareness. Extensive experiments on R2R-CE and RxR-CE demonstrate that StereoNav achieves state-of-the-art egocentric RGB performance, with SR and SPL scores of 81.1% and 68.3%, and 67.5% and 52.0%, respectively, while using significantly fewer parameters and less training data than prior scaling-based approaches. More importantly, real-world robotic deployments confirm that StereoNav substantially improves navigation reliability in complex, unstructured environments.
+
+---
 
 # 安装环境
 
