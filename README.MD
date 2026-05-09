@@ -1,6 +1,6 @@
 <p align="center">
-  <img src="asset/logo.png" alt="StereoNav Logo" width="120"/>
-  <h2 align="center"> What Limits Vision-and-Language Navigation? </h2>
+  <img src="asset/logo.png" alt="StereoNav Logo" width="80"/>
+  <h1 align="center"> What Limits Vision-and-Language Navigation? </h1>
   <p align="center">
     <a href="">Yunheng Wang</a><sup>1</sup>
     ·
@@ -125,9 +125,9 @@ pip install -e habitat-baselines
 cd ..
 ```
 
-## Data Preparation
+# 📦 Data Preparation
 
-### Step 1: Download Scene Data
+## Step 1: Download Scene Data
 
 Download the **MP3D** scenes from [Matterport3D](https://niessner.github.io/Matterport/) and the **HM3D** scenes from [HM3D](https://github.com/matterport/habitat-matterport-3dresearch), then place them under `data/scene/`:
 
@@ -151,7 +151,7 @@ data/scene/
     └── ...
 ```
 
-### Step 2: Download Model Checkpoints
+## Step 2: Download Model Checkpoints
 
 Download the checkpoints from [HuggingFace](https://huggingface.co/anonymous-stereonav/StereoNav_Model) and place them under `checkpoints/`:
 
@@ -161,10 +161,10 @@ Download the checkpoints from [HuggingFace](https://huggingface.co/anonymous-ste
 | `dinov2_large` | 2D structural encoder |
 | `edgenext_small` | component required by FoundationStereo |
 | `foundationstereo` | 3D geometry encoder (pre-trained) |
-| `stereonav_stage1` | StereoNav Stage 1 checkpoint |
-| `stereonav_stage2` | StereoNav Stage 2 checkpoint — ready for evaluation or fine-tuning |
+| `stereonav_stage1` | StereoNav Stage 1 checkpoint — trained on R2R and RxR |
+| `stereonav_stage2` | StereoNav Stage 2 checkpoint — jointly trained on R2R, RxR, ScaleVLN, and DAgger; ready for evaluation or fine-tuning |
 
-### Step 3: Prepare Training Data
+## Step 3: Prepare Training Data
 
 **Option 1: Generate from scratch**
 ```bash
