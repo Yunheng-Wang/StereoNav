@@ -513,7 +513,6 @@ class VLNEvaluator:
                     "os": metrics['oracle_success'],
                     "ne": metrics["distance_to_goal"],
                     "tl": trajectory_length,
-                    "ndtw": ndtw,
                     "steps": step_id,
                     "episode_instruction": episode_instruction
                 }
@@ -600,7 +599,6 @@ def evaluate(model, args):
         "oracle_success": (sum(oss_all) / len(oss_all)).item(),
         "navigation_error": (sum(ones_all) / len(ones_all)).item(),
         "trajectory_length": (sum(tls_all) / len(tls_all)).item(),
-        "ndtw": (sum(ndtws_all) / len(ndtws_all)).item(),
         'num_episodes': len(sucs_all)
     }
 

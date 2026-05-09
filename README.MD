@@ -243,7 +243,7 @@ conda activate stereonav_test
 bash evaluation/accuracy_eval_p_exact.sh
 ```
 
-**Metrics:** Success Rate (SR), SPL, Oracle Success Rate, Navigation Error (NE), Trajectory Length (TL), nDTW
+**Metrics:** Success Rate (SR), SPL, Oracle Success Rate, Navigation Error (NE), Trajectory Length (TL)
 
 ---
 
