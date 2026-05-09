@@ -51,8 +51,14 @@
   <p align="center">
     <img src="asset/main.png" alt="Overview of StereoNav" width="900"/>
   </p>
-  <p align="left"><em>Overview of StereoNav. StereoNav takes stereo RGB observations, a navigation instruction, and a target-location prior as input. The target prior is rendered as persistent visual guidance, while stereo observations are encoded into unified semantic, structural, and geometric tokens through 2D semantic, 2D structural, and 3D geometry encoders. These tokens are then processed by the MLLM for joint action and depth prediction. The right panels illustrate detailed designs of selected modules.</em></p>
+  <p align="center"><strong>Overview of StereoNav</strong></p>
 </p>
+
+## News
+
+- 🔥 **[2026-05-09]** We release all code, model checkpoints, and datasets for StereoNav.
+
+---
 
 ## Abstract
 
@@ -60,20 +66,63 @@ Vision-and-Language Navigation (VLN) is a cornerstone of embodied intelligence. 
 
 ---
 
-# 安装环境
+# Installation
 
-conda create -n stereonav python=3.12.12
+## Clone the Repository
 
-conda activate stereonav
+```bash
+git clone https://github.com/Yunheng-Wang/StereoNav.git
+cd StereoNav
+```
 
-pip install torch==2.6.0+cu124 torchaudio==2.6.0+cu124 torchvision==0.21.0+cu124 --index-url https://download.pytorch.org/whl/cu124
+This project requires **two separate conda environments**: one for training and one for evaluation.
 
-wget https://github.com/Dao-AILab/flash-attention/releases/download/v2.7.1.post2/flash_attn-2.7.1.post2+cu12torch2.4cxx11abiFALSE-cp312-cp312-linux_x86_64.whl
+---
 
-pip install flash_attn-2.7.1.post2+cu12torch2.4cxx11abiFALSE-cp312-cp312-linux_x86_64.whl
+## Environment 1: Training (`stereonav_train`)
 
+**Step 1:** Create the environment from the provided config:
+```bash
+conda env create -f environment_train.yml
+conda activate stereonav_train
+```
 
-conda env update -f environment.yml
+**Step 2:** Install PyTorch with the appropriate CUDA version for your system. Visit [pytorch.org](https://pytorch.org/get-started/locally/) to get the correct command, e.g.:
+```bash
+pip install torch==2.6.0+cu124 torchaudio==2.6.0+cu124 torchvision==0.21.0+cu124 \
+    --index-url https://download.pytorch.org/whl/cu124
+```
+
+**Step 3:** Install `flash-attn`. Download the prebuilt wheel matching your Python, PyTorch, and CUDA versions from the [flash-attention releases page](https://github.com/Dao-AILab/flash-attention/releases), then install it:
+```bash
+pip install flash_attn-*.whl
+```
+
+**Step 4:** Install the matching version of `triton` (should match your PyTorch version):
+```bash
+pip install triton
+```
+
+---
+
+## Environment 2: Evaluation (`stereonav_test`)
+
+**Step 1:** Create the environment and install `habitat-sim`:
+```bash
+conda create -n stereonav_test python=3.9
+conda activate stereonav_test
+conda install habitat-sim==0.2.4 withbullet headless -c conda-forge -c aihabitat
+```
+
+**Step 2:** Install `habitat-lab` and `habitat-baselines`:
+```bash
+git clone --branch v0.2.4 https://github.com/facebookresearch/habitat-lab.git
+cd habitat-lab
+pip install -e habitat-lab
+pip install -e habitat-baselines
+cd ..
+```
+
 
 
 
