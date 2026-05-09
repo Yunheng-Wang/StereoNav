@@ -391,7 +391,9 @@ Stage 1 trains on R2R and RxR datasets. Training configuration is in `train_stag
 
 **Requirements:** 8 GPUs, ~100 GB VRAM total (bf16 mixed precision).
 
+Activate the training environment, then run:
 ```bash
+conda activate stereonav_train
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 accelerate launch \
     --multi_gpu --num_processes 8 --num_machines 1 \
     --mixed_precision bf16 --main_process_port 29555 \
@@ -443,8 +445,9 @@ Stage 2 jointly trains on all datasets. Training configuration is in `train_stag
 1. Edit `train_stage2.yaml`:
    - Set `resume_checkpoint` to your Stage 1 checkpoint path
 
-2. Run training:
+2. Activate the training environment and run:
    ```bash
+   conda activate stereonav_train
    CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 accelerate launch \
        --multi_gpu --num_processes 8 --num_machines 1 \
        --mixed_precision bf16 --main_process_port 29555 \
