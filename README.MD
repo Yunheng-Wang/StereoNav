@@ -194,6 +194,8 @@ data/cache/
         └── intrinsics.txt
 ```
 
+> **Note:** The `dagger/` data provided here was generated using our released checkpoints. We recommend generating your own DAgger data based on your Stage 1 checkpoint. See [Step 1: Collect DAgger Data](#step-1-collect-dagger-data).
+
 
 
 # 🧪 Evaluation
