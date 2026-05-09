@@ -367,85 +367,29 @@ All evaluation results are saved to `./results/` by default. Each run generates:
 
 # 🚀 Training
 
-## Data Preparation
+StereoNav uses a two-stage training pipeline. Stage 1 trains on standard VLN datasets (R2R, RxR), and Stage 2 fine-tunes with DAgger-collected data and ScaleVLN for improved generalization.
 
-Training data can be either generated locally or downloaded from HuggingFace.
+## Prerequisites
 
-**Option 1: Generate from scratch**
-```bash
-bash data/gen_trajectory.sh
-```
-This script generates all training data for Stage 1 (R2R, RxR) and Stage 2 (ScaleVLN via DAgger).
+Before training, complete [Step 2 (Checkpoints)](#step-2-download-model-checkpoints) and [Step 3 (Training Data)](#step-3-prepare-training-data) from the Data Preparation section above.
 
-**Option 2: Download pre-processed data (recommended)**
+**Required checkpoints** (place under `checkpoints/`):
+- `InternVL3_5-2B` — base MLLM backbone
+- `dinov2_large` — 2D semantic encoder
+- `edgenext_small` — 2D structural encoder
+- `foundationstereo` — 3D geometry encoder
 
-Download directly from HuggingFace and place under `data/cache/`:
-```
-https://huggingface.co/datasets/YunhengWang/StereoNav_DataSet
-```
+**Required training data** (place under `data/cache/train/`):
+- `R2R/`, `RxR/` — for Stage 1
+- `ScaleVLN/`, `dagger/` — for Stage 2
 
-The expected data directory structure is:
-```
-data/cache/
-└── train/
-    ├── R2R/
-    │   ├── images/
-    │   ├── annotations_*.json
-    │   ├── summary.json
-    │   ├── baseline.txt
-    │   └── intrinsics.txt
-    ├── RxR/
-    │   ├── images/
-    │   ├── annotations_*.json
-    │   ├── summary.json
-    │   ├── baseline.txt
-    │   └── intrinsics.txt
-    ├── ScaleVLN/
-    │   ├── images/
-    │   ├── annotations_*.json
-    │   ├── summary.json
-    │   ├── baseline.txt
-    │   └── intrinsics.txt
-    └── dagger/
-        ├── R2R/
-        ├── RxR/
-        ├── baseline.txt
-        └── intrinsics.txt
-```
-
-## Model Checkpoints
-
-Download all required checkpoints from HuggingFace and place under `checkpoints/`:
-```
-https://huggingface.co/YunhengWang/StereoNav_Model
-```
-
-The expected checkpoint directory structure is:
-```
-checkpoints/
-├── InternVL3_5-2B/          # Base MLLM backbone
-│   ├── model.safetensors
-│   ├── config.json
-│   └── tokenizer.json, ...
-├── dinov2_large/             # 2D semantic encoder
-│   └── model.safetensors
-├── edgenext_small/           # 2D structural encoder
-│   └── model.safetensors
-├── foundationstereo/         # 3D geometry encoder
-│   └── ...
-├── stereonav_stage1/         # StereoNav Stage 1 checkpoint
-│   ├── model.safetensors
-│   └── config.json, ...
-└── stereonav_stage2/         # StereoNav Stage 2 checkpoint (final)
-    ├── model.safetensors
-    └── config.json, ...
-```
-
-
+---
 
 ## Stage 1 Training
 
-Default: 8 GPUs
+Stage 1 trains on R2R and RxR datasets. Training configuration is in `train_stage1.yaml`.
+
+**Requirements:** 8 GPUs, ~100 GB VRAM total (bf16 mixed precision).
 
 ```bash
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 accelerate launch \
@@ -454,44 +398,52 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 accelerate launch \
     --dynamo_backend no train_stage1.py
 ```
 
+Checkpoints and logs are saved to `log/`.
+
 ---
 
 ## Stage 2 Training
 
+Stage 2 jointly trains on R2R, RxR, ScaleVLN, and DAgger data. It requires first collecting DAgger trajectories using your Stage 1 checkpoint.
+
 ### Step 1: Collect DAgger Data
 
-First, start model inference servers:
+DAgger data is collected by running the Stage 1 model in the simulator and recording corrected trajectories for R2R and RxR.
 
 1. Edit `scripts/server.sh`:
-   - Set `CHECKPOINT_PATH` to your Stage 1 checkpoint
-   - Set `BASE_PORT` (default: 7200) and `NUM_GPUS` (default: 8)
+   - Set `CHECKPOINT_PATH` to your Stage 1 checkpoint directory
+   - Set `BASE_PORT` (default: `7200`) and `NUM_GPUS` (default: `8`)
 
-2. Run:
+2. Start the inference servers:
    ```bash
    bash scripts/server.sh
    ```
 
-Then generate DAgger data for R2R and RxR:
+3. Collect DAgger data (ensure `BASE_PORT` and `NUM_GPUS` in `data/dagger.sh` match the servers):
+   ```bash
+   bash data/dagger.sh
+   ```
 
-```bash
-bash data/dagger.sh
-```
+Output is saved to `data/cache/train/dagger/`.
 
-Make sure `BASE_PORT` and `NUM_GPUS` in `data/dagger.sh` match your running servers.
+### Step 2: Train Stage 2
 
-### Step 2: Train
+Stage 2 jointly trains on all datasets. Training configuration is in `train_stage2.yaml`.
 
-Edit `train_stage2.yaml`:
-- Set `resume_checkpoint` to your Stage 1 checkpoint path
+**Requirements:** 8 GPUs, ~100 GB VRAM total (bf16 mixed precision).
 
-Run training (default: 8 GPUs):
+1. Edit `train_stage2.yaml`:
+   - Set `resume_checkpoint` to your Stage 1 checkpoint path
 
-```bash
-CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 accelerate launch \
-    --multi_gpu --num_processes 8 --num_machines 1 \
-    --mixed_precision bf16 --main_process_port 29555 \
-    --dynamo_backend no train_stage2.py
-```
+2. Run training:
+   ```bash
+   CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 accelerate launch \
+       --multi_gpu --num_processes 8 --num_machines 1 \
+       --mixed_precision bf16 --main_process_port 29555 \
+       --dynamo_backend no train_stage2.py
+   ```
+
+Checkpoints and logs are saved to `log/`.
 
 
 # 🤖 Real-World Deployment
@@ -505,7 +457,7 @@ The deployment involves four components running across three machines:
 | ZED camera server | G1 onboard computer | `real_world/zed/zed_realtime_server.py` |
 | Robot action server | Laptop (connected to G1) | `real_world/action_server.py` |
 | StereoNav inference server | Remote GPU server | `scripts/server.sh` |
-| Navigation controller | Laptop | `real_world/deployment.sh` |
+| Navigation controller | Laptop (connected to G1) | `real_world/deployment.sh` |
 
 ---
 
