@@ -146,16 +146,23 @@ data/scene/
 
 ## Step 2: Download Model Checkpoints
 
-Download the checkpoints from [HuggingFace](https://huggingface.co/anonymous-stereonav/StereoNav_Model) and place them under `checkpoints/`:
+Download all checkpoints from [HuggingFace](https://huggingface.co/anonymous-stereonav/StereoNav_Model) and place them under `checkpoints/`.
+
+**Pre-trained backbone models** (required for training):
 
 | Checkpoint | Description |
 |---|---|
 | `InternVL3_5-2B` | Base MLLM backbone |
 | `dinov2_large` | 2D structural encoder |
-| `edgenext_small` | component required by FoundationStereo |
+| `edgenext_small` | Component required by FoundationStereo |
 | `foundationstereo` | 3D geometry encoder (pre-trained) |
-| `stereonav_stage1` | StereoNav Stage 1 checkpoint — trained on R2R and RxR |
-| `stereonav_stage2` | StereoNav Stage 2 checkpoint — jointly trained on R2R, RxR, ScaleVLN, and DAgger; ready for evaluation or fine-tuning |
+
+**StereoNav checkpoints** (our trained models, ready for evaluation or fine-tuning):
+
+| Checkpoint | Description |
+|---|---|
+| `stereonav_stage1` | Stage 1 checkpoint — trained on R2R and RxR |
+| `stereonav_stage2` | Stage 2 checkpoint — jointly trained on R2R, RxR, ScaleVLN, and DAgger |
 
 ## Step 3: Prepare Training Data
 
