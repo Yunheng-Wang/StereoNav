@@ -58,61 +58,64 @@ Vision-and-Language Navigation (VLN) is a cornerstone of embodied intelligence. 
 
 # 🛠️ Installation
 
-## Clone the Repository
+## 1. Clone the Repository
 
 ```bash
 git clone https://github.com/Yunheng-Wang/StereoNav.git
 cd StereoNav
 ```
 
-This project requires **two separate conda environments**: one for training and one for evaluation.
+This project requires **two separate conda environments**: `stereonav_train` for training and inference, and `stereonav_test` for evaluation.
 
 ---
 
-## Environment 1: Training (`stereonav_train`)
+## 2. Training Environment (`stereonav_train`)
 
-**Step 1:** Create the environment from the provided config:
+**Step 1 — Create the base environment:**
 ```bash
 conda env create -f environment_train.yml
 conda activate stereonav_train
 ```
 
-**Step 2:** Install PyTorch with the appropriate CUDA version for your system. Visit [pytorch.org](https://pytorch.org/get-started/locally/) to get the correct command, e.g.:
+**Step 2 — Install PyTorch** with the CUDA version matching your system. See [pytorch.org](https://pytorch.org/get-started/locally/) for the correct command. Example for CUDA 12.4:
 ```bash
 pip install torch==2.6.0+cu124 torchaudio==2.6.0+cu124 torchvision==0.21.0+cu124 \
     --index-url https://download.pytorch.org/whl/cu124
 ```
 
-**Step 3:** Install `flash-attn`. Download the prebuilt wheel matching your Python, PyTorch, and CUDA versions from the [flash-attention releases page](https://github.com/Dao-AILab/flash-attention/releases), then install it:
+**Step 3 — Install `flash-attn`:** Download the prebuilt wheel that matches your Python, PyTorch, and CUDA versions from the [flash-attention releases page](https://github.com/Dao-AILab/flash-attention/releases), then install it:
 ```bash
 pip install flash_attn-*.whl
 ```
 
-**Step 4:** Install the matching version of `triton` (should match your PyTorch version):
+**Step 4 — Install `triton`** (version should match your PyTorch installation):
 ```bash
 pip install triton
 ```
 
-
-
 ---
 
-## Environment 2: Evaluation (`stereonav_test`)
+## 3. Evaluation Environment (`stereonav_test`)
 
-**Step 1:** Create the environment and install `habitat-sim`:
+**Step 1 — Create the environment and install `habitat-sim`:**
 ```bash
 conda create -n stereonav_test python=3.9
 conda activate stereonav_test
 conda install habitat-sim==0.2.4 withbullet headless -c conda-forge -c aihabitat
 ```
 
-**Step 2:** Install `habitat-lab` and `habitat-baselines`:
+**Step 2 — Install `habitat-lab` and `habitat-baselines`:**
 ```bash
 git clone --branch v0.2.4 https://github.com/facebookresearch/habitat-lab.git
 cd habitat-lab
 pip install -e habitat-lab
 pip install -e habitat-baselines
 cd ..
+```
+
+**Step 3 — Install remaining dependencies:**
+```bash
+pip install -r requirements.txt
 ```
 
 # 📦 Data Preparation

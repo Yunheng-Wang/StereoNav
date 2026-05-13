@@ -180,4 +180,3 @@ dependencies:
       - werkzeug==3.1.4
       - widgetsnbextension==4.0.15
       - zipp==3.23.0
-prefix: /home/CONNECT/yfang870/miniconda3/envs/stereovla
