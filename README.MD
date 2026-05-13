@@ -35,7 +35,7 @@
 
 <p align="center">
   <a href=""><img src="https://img.shields.io/badge/arXiv-Paper-b31b1b?logo=arxiv" alt="arXiv"></a>
-  <a href=""><img src="https://img.shields.io/badge/🚀_Project_Page-StereoNav-blue" alt="Project Page"></a>
+  <a href="https://yunheng-wang.github.io/stereonav-public.github.io/"><img src="https://img.shields.io/badge/🚀_Project_Page-StereoNav-blue" alt="Project Page"></a>
   <a href="https://huggingface.co/datasets/YunhengWang/StereoNav_DataSet"><img src="https://img.shields.io/badge/🤗_Dataset-StereoNav_DataSet-yellow" alt="Dataset"></a>
   <a href="https://huggingface.co/YunhengWang/StereoNav_Model"><img src="https://img.shields.io/badge/🤗_Checkpoints-StereoNav_Model-yellow" alt="Checkpoints"></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License: MIT"></a>
