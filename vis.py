@@ -375,16 +375,16 @@ if __name__ == "__main__":
 
 
 # python vis.py \
-#     --r2r_config /home/CONNECT/yfang870/yunhengwang/StereoVLN_InternVL_3_5_2_B/config/eval_r2r.yaml \
-#     --rxr_config /home/CONNECT/yfang870/yunhengwang/StereoVLN_InternVL_3_5_2_B/config/eval_rxr.yaml \
+#     --r2r_config ./config/eval_r2r.yaml \
+#     --rxr_config ./config/eval_rxr.yaml \
 #     --split val_unseen \
 #     --num_samples 10 \
 #     --max_steps 500 \
-#     --output_dir /home/CONNECT/yfang870/yunhengwang/StereoVLN_InternVL_3_5_2_B/vis \
+#     --output_dir ./vis \
 #     --datasets r2r,rxr \
-#     --r2r_data_path /home/CONNECT/yfang870/yunhengwang/StereoVLN_InternVL_3_5_2_B/data/task/r2r/val_unseen/val_unseen.json.gz \
-#     --rxr_data_path /home/CONNECT/yfang870/yunhengwang/StereoVLN_InternVL_3_5_2_B/data/task/rxr/val_unseen/val_unseen_guide.json.gz \
-#     --scenes_dir /home/CONNECT/yfang870/yunhengwang/StereoVLN_InternVL_3_5_2_B/data/scene/
+#     --r2r_data_path ./data/task/r2r/val_unseen/val_unseen.json.gz \
+#     --rxr_data_path ./data/task/rxr/val_unseen/val_unseen_guide.json.gz \
+#     --scenes_dir ./data/scene/
 
 
 
