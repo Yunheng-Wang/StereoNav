@@ -1,11 +1,5 @@
 __pycache__/
-
-baseline/
 checkpoints/
-
 data/cache/
 data/scene/
-
 habitat-lab/
-log/
-results/
