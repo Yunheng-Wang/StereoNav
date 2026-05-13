@@ -179,7 +179,7 @@ Download from [HuggingFace](https://huggingface.co/datasets/YunhengWang/StereoNa
 ```
 data/cache/
 └── train/
-    ├── R2R/                    # same structure for RxR and ScaleVLN
+    ├── R2R/                  
     │   ├── images/
     │   ├── annotations_*.json
     │   ├── summary.json
@@ -200,7 +200,7 @@ data/cache/
 
 # 🧪 Evaluation
 
-All evaluations use the `stereonav_test` environment and require a running StereoNav inference server.
+All evaluations run in the `stereonav_test` environment. They communicate with a StereoNav inference server, which runs separately in the `stereonav_train` environment.
 
 ## Prerequisites: Start Inference Servers
 
@@ -243,13 +243,13 @@ conda activate stereonav_test
 bash evaluation/accuracy_eval_p_exact.sh
 ```
 
-**Metrics:** Success Rate (SR), SPL, Oracle Success Rate, Navigation Error (NE), Trajectory Length (TL), nDTW
+**Metrics:** Success Rate (SR), SPL, Oracle Success Rate, Navigation Error (NE), Trajectory Length (TL)
 
 ---
 
 ## 2. Accuracy Evaluation (Coarse Goal Points)
 
-Evaluates robustness to goal-point localization errors by randomly sampling the goal point within a radius around the true target. This simulates real-world scenarios where GPS or map-based localization is imprecise.
+Evaluates robustness to goal-point localization errors by randomly sampling the goal point within a radius around the true target.
 
 **Environment:** `stereonav_test`
 
@@ -349,7 +349,7 @@ Analyzes the degree of ambiguity in navigation instructions using a VLM judge. T
 
 ### Step 1: Generate Trajectory Data
 
-Generate ground-truth trajectory frames for the R2R validation set:
+Generate ground-truth trajectory frames for the R2R-CE unseen validation set:
 ```bash
 conda activate stereonav_test
 bash evaluation/cache/gen_data.sh
@@ -482,8 +482,8 @@ The deployment involves four components running across three machines:
 |---|---|---|
 | ZED camera server | G1 onboard computer | `real_world/zed/zed_realtime_server.py` |
 | Robot action server | Laptop (connected to G1) | `real_world/action_server.py` |
-| StereoNav inference server | Remote GPU server | `scripts/server.sh` |
 | Navigation controller | Laptop (connected to G1) | `real_world/deployment.sh` |
+| StereoNav inference server | Remote GPU server | `scripts/server.sh` |
 
 ---
 
