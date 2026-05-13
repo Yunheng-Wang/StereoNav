@@ -598,6 +598,9 @@ We thank the following open-source projects for their valuable contributions to 
 - [StereoVLA](https://github.com/shengliangd/StereoVLA)
 - [TWIST2](https://github.com/amazon-far/TWIST2)
 - [Unitree Robotics](https://github.com/unitreerobotics)
+- [FoundationStereo](https://github.com/NVlabs/FoundationStereo)
+- [InternVL](https://github.com/OpenGVLab/InternVL)
+- [DINOv2](https://github.com/facebookresearch/dinov2)
 
 ---
 
